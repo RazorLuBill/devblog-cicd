@@ -1,8 +1,14 @@
+"""
+Módulo de modelos para el blog DevBlog
+"""
 from datetime import datetime
 from typing import List, Dict, Optional
 
 class BlogPost:
-      
+    """
+    Clase que representa un post del blog
+    Contiene título, contenido, autor y timestamps
+    """
     def __init__(self, title: str, content: str, author: str = "Admin"):
         """
         Constructor del post
@@ -15,7 +21,7 @@ class BlogPost:
 
   # Fecha de creación automática
         self.updated_at = datetime.now()  # Fecha de última actualización
-    
+
     def to_dict(self) -> Dict:
         """
         Convierte el post a diccionario para JSON/API
@@ -30,7 +36,7 @@ class BlogPost:
             # Resumen para la lista de posts (primeros 150 caracteres)
             'summary': self.content[:150] + '...' if len(self.content) > 150 else self.content
         }
-    
+
     def update(self, title: str = None, content: str = None):
         """
         Actualiza el post con nuevos datos
@@ -47,15 +53,15 @@ class BlogStorage:
     Clase para manejar el almacenamiento de posts
     En producción real usarías PostgreSQL, MySQL, etc.
     """
-    
+
     def __init__(self):
         """Inicializa el almacenamiento con algunos posts de ejemplo"""
         self._posts: List[BlogPost] = []
         self._next_id = 1
-        
+
         # Crear algunos posts de ejemplo para que el blog no esté vacío
         self._create_sample_posts()
-    
+
     def _create_sample_posts(self):
         """Crea posts de ejemplo para demostración"""
         sample_posts = [
@@ -63,7 +69,8 @@ class BlogStorage:
 
 
                 'title': '¡Bienvenido a DevBlog!',
-                'content': '''Este es mi primer post en DevBlog, una aplicación creada para aprender DevOps y CI/CD.
+                'content': '''Este es mi primer post en DevBlog, una aplicación creada para aprender 
+                            DevOps y CI/CD.
                 
                 En este blog compartiré mi experiencia aprendiendo:
                 - Desarrollo web con Flask
@@ -91,7 +98,7 @@ class BlogStorage:
                 'author': 'DevOps Student'
             }
         ]
-        
+
         for post_data in sample_posts:
             post = BlogPost(
                 title=post_data['title'],
@@ -99,7 +106,7 @@ class BlogStorage:
                 author=post_data['author']
             )
             self.create_post(post)
-    
+
     def create_post(self, post: BlogPost) -> BlogPost:
         """
         Crea un nuevo post
@@ -112,7 +119,7 @@ class BlogStorage:
         self._next_id += 1
         self._posts.append(post)
         return post
-    
+
     def get_all_posts(self) -> List[BlogPost]:
         """
         Obtiene todos los posts ordenados por fecha (más recientes primero)
@@ -120,7 +127,7 @@ class BlogStorage:
             Lista de posts ordenada
         """
         return sorted(self._posts, key=lambda x: x.created_at, reverse=True)
-    
+
     def get_post_by_id(self, post_id: int) -> Optional[BlogPost]:
         """
         Busca un post por su ID
@@ -135,7 +142,7 @@ class BlogStorage:
             if post.id == post_id:
                 return post
         return None
-    
+
     def update_post(self, post_id: int, title: str = None, content: str = None) -> Optional[BlogPost]:
         """
         Actualiza un post existente
@@ -153,7 +160,7 @@ class BlogStorage:
             post.update(title, content)
             return post
         return None
-    
+
     def delete_post(self, post_id: int) -> bool:
         """
         Elimina un post
@@ -169,7 +176,7 @@ class BlogStorage:
             self._posts.remove(post)
             return True
         return False
-    
+
     def search_posts(self, query: str) -> List[BlogPost]:
         """
         Busca posts que contengan la query en título o contenido
@@ -183,20 +190,20 @@ class BlogStorage:
         query = query.lower().strip()
         if not query:
             return self.get_all_posts()
-        
+
         results = []
         for post in self._posts:
             # Busca en título y contenido (case-insensitive)
-            if (query in post.title.lower() or 
+            if (query in post.title.lower() or
                 query in post.content.lower()):
                 results.append(post)
-        
+
         # Ordena por relevancia (título primero, luego por fecha)
         results.sort(key=lambda x: (
             query not in x.title.lower(),  # Título tiene prioridad
             -x.created_at.timestamp()      # Luego por fecha reciente
         ))
-        
+
         return results
 
 
